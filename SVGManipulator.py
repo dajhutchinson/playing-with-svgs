@@ -43,40 +43,40 @@ class SVGManipulator:
 
     # embed one svg on top of another, at a given position
     def embed_svg(original_svg,embedding_svg,x,y,embed_width,embed_height,output_name="new_name"):
+        p_width=re.compile('viewbox=\"([0-9]+) [0-9]+ ([0-9]+) [0-9]+\"')
+        p_height=re.compile('viewbox=\"[0-9]+ ([0-9]+) [0-9]+ ([0-9]+)\"')
 
+        # split opening <svg> tag from rest of original image
         with open(original_svg,"r") as f:
             contents=f.read()
-
-            # split opening <svg> tag from rest of original image
             svg_tag=re.search("(<svg[^>]*>)",contents).group(0)
             rest_img=contents[len(svg_tag):]
 
-            # calculate width and height of original image for scaling
-            p_width=re.compile('viewbox=\"([0-9]+) [0-9]+ ([0-9]+) [0-9]+\"')
-            original_widths=p_width.search(contents)
-            p_height=re.compile('viewbox=\"[0-9]+ ([0-9]+) [0-9]+ ([0-9]+)\"')
-            original_heights=p_height.search(contents)
-
-
         # calculations for scaling
-        original_height=int(original_widths.group(2))-int(original_widths.group(1))
-        original_width=int(original_widths.group(2))-int(original_widths.group(1))
+        with open(embedding_svg,"r") as e:
+            contents=e.read()
 
-        width=round((embed_width/original_width),2)
-        height=round((embed_height/original_height),2)
-        transformation_string="scale({} {}) translate({},{})".format(width,height,x,y)
+            embedding_widths=p_width.search(contents)
+            embedding_heights=p_height.search(contents)
+
+            embedding_width=int(embedding_widths.group(2))-int(embedding_widths.group(1))
+            embedding_height=int(embedding_heights.group(2))-int(embedding_heights.group(1))
+
+        width=round((embed_width/embedding_height),3)
+        height=round((embed_height/embedding_width),3)
+        transformation_string="scale({} {}) translate({},{})".format(width,height,int(x/width),int(y/height))
 
         # embed image
         with open(output_name,"w+") as new_f:
             new_f.write(svg_tag+"\n")
-            new_f.write('\t<image x="{}" y="{}" width="100%" height="100%" href="{}" transform="{}"></image>'.format(x,y,embedding_svg,transformation_string))
+            new_f.write('\t<image x="0" y="0" width="100%" height="100%" href="{}" transform="{}"></image>'.format(embedding_svg,transformation_string))
             new_f.write(rest_img)
 
         return
 
 if __name__=="__main__":
     styler=Styler()
-    SVGManipulator.grid(cols=2,rows=2,styler=styler,output_name="cross")
+    SVGManipulator.grid(cols=2,rows=2,styler=styler,output_name="cross",img_width=500,img_height=300)
 
     styler.line_colour="#0f0"
     SVGManipulator.grid(cols=5,rows=5,styler=styler,output_name="green_grid")
@@ -85,6 +85,6 @@ if __name__=="__main__":
     styler.line_colour="#0ff"
     SVGManipulator.grid(cols=0,rows=5,styler=styler,output_name="turq_grid")
 
-    SVGManipulator.embed_svg("cross.svg","green_grid.svg",0,0,50,50,output_name="cross.svg")
-    SVGManipulator.embed_svg("cross.svg","blue_grid.svg",50,50,50,50,output_name="cross.svg")
-    SVGManipulator.embed_svg("cross.svg","turq_grid.svg",0,50,50,50,output_name="cross.svg")
+    SVGManipulator.embed_svg("cross.svg","green_grid.svg",0,0,250,150,output_name="cross.svg")
+    SVGManipulator.embed_svg("cross.svg","blue_grid.svg",250,150,250,150,output_name="cross.svg")
+    SVGManipulator.embed_svg("cross.svg","turq_grid.svg",0,150,250,150,output_name="cross.svg")
