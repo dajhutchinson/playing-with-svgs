@@ -42,7 +42,8 @@ class SVGManipulator:
         return output_name,grid_lines
 
     # embed one svg on top of another, at a given position
-    def embed_svg(original_svg,embedding_svg,x,y,embed_width,embed_height,output_name="new_name"):
+    def embed_svg(original_svg,embedding_svg,x,y,embed_width,embed_height,
+        centre_embedding=True,output_name="new_name"):
         p_width=re.compile('viewbox=\"([0-9]+) [0-9]+ ([0-9]+) [0-9]+\"')
         p_height=re.compile('viewbox=\"[0-9]+ ([0-9]+) [0-9]+ ([0-9]+)\"')
 
@@ -56,17 +57,25 @@ class SVGManipulator:
         with open(embedding_svg,"r") as e:
             e_contents=e.read()
 
-            embedding_widths=p_width.search(e_contents)
-            embedding_heights=p_height.search(e_contents)
+            image_widths=p_width.search(e_contents)
+            image_heights=p_height.search(e_contents)
 
-            embedding_width=int(embedding_widths.group(2))-int(embedding_widths.group(1))
-            embedding_height=int(embedding_heights.group(2))-int(embedding_heights.group(1))
-            print(embedding_width,embedding_height)
+            image_width=int(image_widths.group(2))-int(image_widths.group(1))
+            image_height=int(image_heights.group(2))-int(image_heights.group(1))
 
-        width=round((embed_width/embedding_width),3)
-        height=round((embed_height/embedding_height),3)
-        scale_factor=min(width,height) # keep aspect ratio
-        transformation_string="scale({0} {0}) translate({1},{2})".format(scale_factor,int(x/scale_factor),int(y/scale_factor))
+        horiz_scale=round((embed_width/image_width),3)
+        vert_scale=round((embed_height/image_height),3)
+        scale_factor=min(horiz_scale,vert_scale) # keep aspect ratio
+
+        # work out transform distance if centering embedding
+        if centre_embedding==True:
+            vert_centre_extra =int((embed_height-(image_height*scale_factor))*.5*(1/scale_factor))
+            horiz_centre_extra=int((embed_width-(image_width*scale_factor))*.5*(1/scale_factor))
+        else:
+            vert_centre_extra =0
+            horiz_centre_extra=0
+
+        transformation_string="scale({0} {0}) translate({1},{2})".format(scale_factor,int(x/scale_factor)+horiz_centre_extra,int(y/scale_factor)+vert_centre_extra)
 
         # embed image
         with open(output_name,"w+") as new_f:
