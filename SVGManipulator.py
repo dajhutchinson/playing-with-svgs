@@ -54,17 +54,19 @@ class SVGManipulator:
 
         # calculations for scaling
         with open(embedding_svg,"r") as e:
-            contents=e.read()
+            e_contents=e.read()
 
-            embedding_widths=p_width.search(contents)
-            embedding_heights=p_height.search(contents)
+            embedding_widths=p_width.search(e_contents)
+            embedding_heights=p_height.search(e_contents)
 
             embedding_width=int(embedding_widths.group(2))-int(embedding_widths.group(1))
             embedding_height=int(embedding_heights.group(2))-int(embedding_heights.group(1))
+            print(embedding_width,embedding_height)
 
-        width=round((embed_width/embedding_height),3)
-        height=round((embed_height/embedding_width),3)
-        transformation_string="scale({} {}) translate({},{})".format(width,height,int(x/width),int(y/height))
+        width=round((embed_width/embedding_width),3)
+        height=round((embed_height/embedding_height),3)
+        scale_factor=min(width,height) # keep aspect ratio
+        transformation_string="scale({0} {0}) translate({1},{2})".format(scale_factor,int(x/scale_factor),int(y/scale_factor))
 
         # embed image
         with open(output_name,"w+") as new_f:
@@ -85,6 +87,7 @@ if __name__=="__main__":
     styler.line_colour="#0ff"
     SVGManipulator.grid(cols=0,rows=5,styler=styler,output_name="turq_grid")
 
+    SVGManipulator.embed_svg("cross.svg","1.svg",250,0,250,150,output_name="cross.svg")
     SVGManipulator.embed_svg("cross.svg","green_grid.svg",0,0,250,150,output_name="cross.svg")
     SVGManipulator.embed_svg("cross.svg","blue_grid.svg",250,150,250,150,output_name="cross.svg")
     SVGManipulator.embed_svg("cross.svg","turq_grid.svg",0,150,250,150,output_name="cross.svg")
