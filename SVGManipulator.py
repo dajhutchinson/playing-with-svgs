@@ -100,7 +100,8 @@ class SVGManipulator:
         return output_name
 
 
-    def plot_multiple_svg_on_grid(svg_names:[str],h_padding_prop=.1,cols=5,rows=5,img_width=1000,img_height=1000,styler=None,output_name="test.svg") -> str:
+    def plot_multiple_svg_on_grid(svg_names:[str],h_padding_prop=.1,cols=5,rows=5,img_width=1000,img_height=1000,
+        styler=None,title=None,output_name="test.svg") -> str:
         output_name=SVGManipulator.blank(img_width,img_height,output_name)
 
         x_poss=[0]+SVGManipulator.__grid_lines(cols,img_width)
@@ -113,7 +114,6 @@ class SVGManipulator:
         for i,svg_file_name in enumerate(svg_names):
             # determine height of start position so it can be aligned
             first_y=SVGManipulator.__start_height(svg_file_name)
-            # prop_first_y=0
 
             # determine position on grid
             grid_x=i%cols
@@ -125,6 +125,11 @@ class SVGManipulator:
 
             # embed it
             SVGManipulator.embed_svg(output_name,svg_file_name,x=pos_x,y=pos_y,embed_width=width,embed_height=height,centre_embedding=False,output_name=output_name,dy=-first_y)
+
+        if (title is not None):
+            font_size=int(y_poss[0]*.6)
+            title_object_str='<text x="{}" y="{}" font-size="{}px" text-anchor="middle">{}</text>'.format(int(img_width/2),int(y_poss[0]*.7),font_size,title)
+            SVGManipulator.svg_add_object(output_name,title_object_str,output_name)
 
         return output_name
 
@@ -156,5 +161,5 @@ if __name__=="__main__":
     # or to do with the transforms and where scale() is centred
 
     svg_names=["examples/{}.svg".format(i) for i in range(2,44)]
-    output_name=SVGManipulator.plot_multiple_svg_on_grid(svg_names,h_padding_prop=.1,cols=6,rows=7+1,styler=styler)
+    output_name=SVGManipulator.plot_multiple_svg_on_grid(svg_names,h_padding_prop=.1,cols=6,rows=7+1,styler=styler,title="Profiles")
     print(output_name)
