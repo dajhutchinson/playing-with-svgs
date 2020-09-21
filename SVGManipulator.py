@@ -149,7 +149,7 @@ class SVGManipulator:
         return output_name
 
     def plot_multiple_svg_on_grid(svg_names:[str],h_padding_prop=.1,cols=5,rows=5,img_width=1000,img_height=1000,
-        align_start=True,title=None,output_name="test.svg") -> str:
+        align_start=True,title=None,centre_embedding=False,output_name="test.svg") -> str:
         output_name=SVGManipulator.blank(img_width,img_height,output_name)
 
         x_poss=[0]+SVGManipulator.__grid_lines(cols,img_width)
@@ -176,7 +176,7 @@ class SVGManipulator:
             pos_y=y_poss[grid_y]
 
             # embed it
-            SVGManipulator.embed_svg(output_name,svg_file_name,x=pos_x,y=pos_y,embed_width=width,embed_height=height,centre_embedding=False,output_name=output_name,dy=-first_y)
+            SVGManipulator.embed_svg(output_name,svg_file_name,x=pos_x,y=pos_y,embed_width=width,embed_height=height,centre_embedding=centre_embedding,output_name=output_name,dy=-first_y)
 
         if (title is not None):
             font_size=int(y_poss[0]*.6)
@@ -212,3 +212,4 @@ if __name__=="__main__":
     #
     # SVGManipulator.plot_multiple_svg_on_grid(route_svg_names[1:],h_padding_prop=.1,cols=6,rows=7+1,title="Routes",align_start=False,output_name="routes.svg")
     # SVGManipulator.plot_multiple_svg_on_grid(ele_svg_names,h_padding_prop=.1,cols=6,rows=7+1,title="Profiles",output_name="profiles.svg")
+    pass

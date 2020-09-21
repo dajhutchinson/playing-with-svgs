@@ -4,7 +4,7 @@ import re
 
 class GridImageStyler:
 
-    def __init__(self,svg_class=None,grid_layout=None,title=None,title_class=None,grid_dy=0,feature_svg_path=None,feature_svg_pos="bot",feature_dy=0,feature_text=None,feature_text_class=None,img_width=1000,img_height=1000):
+    def __init__(self,svg_class=None,centre_embedding=False,align_start=True,grid_layout=None,title=None,title_class=None,grid_dy=0,feature_svg_path=None,feature_svg_pos="bot",feature_dy=0,feature_text=None,feature_text_class=None,img_width=1000,img_height=1000):
         """
         DESCRIPTION
         Holds styling options for SVGArtist.grid_image
@@ -12,6 +12,8 @@ class GridImageStyler:
         PARAMETERS
             svg_class (str): name for css class for plots in grid (default=`None`)
             grid_layout ((int,int)): cols x rows in grid (default=`None`)
+            centre_embedding (bool): whether to centre grid images in their box
+            align_start (bool): whether to align start positions of grid images
             title (str): Title of plot (default=`None`)
             title_class (str): name for css class for title (default=`None`)
             grid_dy (int): amount of vertical shift on grid (default=0)
@@ -24,10 +26,15 @@ class GridImageStyler:
             img_height (int): height of produced image (default=1000)
         """
         self.svg_class=svg_class
+
+        self.centre_embedding=centre_embedding
+        self.align_start=align_start
         self.grid_layout=grid_layout
+        self.grid_dy=grid_dy
+
         self.title=title
         self.title_class=title_class
-        self.grid_dy=grid_dy
+
         self.feature_svg_path=feature_svg_path
         self.feature_svg_pos=feature_svg_pos
         self.feature_dy=feature_dy
@@ -69,7 +76,7 @@ class SVGArtist:
         grid_height=styler.img_height
         if styler.title is not None: grid_height-=.1*styler.img_height
         if styler.feature_svg_path is not None: grid_height-=.1*styler.img_height
-        grid_svg_name=SVGManipulator.plot_multiple_svg_on_grid(svg_paths,cols=grid_layout[0]+1,rows=grid_layout[1]+1,img_width=styler.img_width,img_height=int(grid_height),output_name=grid_svg_name)
+        grid_svg_name=SVGManipulator.plot_multiple_svg_on_grid(svg_paths,align_start=styler.align_start,centre_embedding=styler.centre_embedding,cols=grid_layout[0]+1,rows=grid_layout[1]+1,img_width=styler.img_width,img_height=int(grid_height),output_name=grid_svg_name)
 
         # embed grid
         grid_y=0
@@ -119,12 +126,18 @@ class SVGArtist:
         return {"main_svg":svg_file_name,"grid_svg":grid_svg_name}
 
 if __name__=="__main__":
-        # route_svg_names=["examples/{}_route.svg".format(i) for i in range(1,44)]
-        # ele_svg_names=["examples/{}_ele.svg".format(i) for i in range(2,44)]
-        #
-        # styler=GridImageStyler(grid_dy=-100,feature_dy=-100,feature_svg_path=ele_svg_names[-1],feature_svg_pos="bot",feature_text=("21.1km","1:35:01"),title="Liverpool Half Marathon",title_class="title")
-        # files=SVGArtist.grid_image(ele_svg_names[:-1],styler=styler)
-        # print(files)
+    # TODO break down grid_image function
+    route_svg_names=["examples/{}_route.svg".format(i) for i in range(1,44)]
+    ele_svg_names=["examples/{}_ele.svg".format(i) for i in range(2,44)]
 
-        # print(route_svg_names[0])
-        # print(SVGManipulator.extract_svg_content(route_svg_names[0]))
+    styler=GridImageStyler(grid_dy=-100,feature_dy=-100,feature_svg_path=ele_svg_names[-1],feature_svg_pos="bot",feature_text=("21.1km","1:35:01"),title="Liverpool Half Marathon",title_class="title")
+    files=SVGArtist.grid_image(ele_svg_names[:-1],styler=styler,output_name="profiles")
+
+    styler.align_start=False
+    styler.centre_embedding=True
+    styler.feature_dy=0
+    styler.feature_svg_path=route_svg_names[-1]
+    files=SVGArtist.grid_image(route_svg_names[:-1],styler=styler,output_name="routes")
+    print(files)
+
+    pass
